@@ -17,4 +17,5 @@ This command is only allowed by users with the "Administrator" permission on the
 This command must be run on a server. This command can be run by anyone. If the user does not already have the configured role, the bot will attempt to grant the configured role to the user. If the user already has the role, the bot will remove it from the user. If the bot is successfull, a message will be displayed indicating such in the channel the command was run in. If the bot fails to adjust the role, it will remain silent.
 
 ### !hunt <message>
+***Please don't abuse this command as it pings multiple servers!!!
 This command can be run on a server or in DM by users with the "Oortian" and/or "Oortling" roles. This command must have a message to work. When this command is sent, all servers with notifications configured will be notified with the message specified by this command. See "!config hunt" above for notification configuration, and how roles are pinged on servers.

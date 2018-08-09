@@ -10,7 +10,7 @@ This command can be run on a server or in DM by anyone. The bot will simply resp
 ### !listroles
 This command must be run on a server. This command can be run by anyone. This command will DM the caller a list of roles and their IDs from the server that the command was run on. This is to provide ease of use to obtain role IDs without having to ping a role. There are other cumbersome ways to get the role ID so this is not a security issue as the information is already public.
 
-### !config hunt <role>
+### !config hunt \<role\>
 This command is only allowed by users with the "Administrator" permission on the server the command is run on. This command must be run on a server. This command will enable hunt notifications in the channel that the command was run in. <role> can be a mention (ping) of a role "<@&id>", or simply the role id by itself. When a valid !hunt command is later issued, the bot will try to set the role as pingable, ping the role with the message in the !hunt command, then set the role back to unpingable. If the bot doesn't have manage role permissions for role, then this will fail silently, but the message will still be sent to the configured channel.
 
 ### !hunter

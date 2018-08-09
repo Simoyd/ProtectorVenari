@@ -158,66 +158,101 @@ namespace ProtectorVenari
                 bool isTest = arg.Content.StartsWith("!test ");
 
                 // Get the user's roles on main boundless discord
-                var authorRoles = _boundlessServer.GetUser(arg.Author.Id).Roles.Select(cur => cur.Name);
+                string[] authorRoles = _boundlessServer.GetUser(arg.Author.Id).Roles.Select(cur => cur.Name).ToArray();
 
                 // Only certain roles are allowed to perform the ping
                 if (authorRoles.Contains("Oortian") ||
                     authorRoles.Contains("Oortling"))
                 {
-                    // Loop through all configured servers
-                    foreach (HunterInfo curInfo in _hunterInfo.GetAll())
+                    if (arg.Content.StartsWith("!hunt config"))
                     {
-                        SocketRole role = null;
-
-                        // Get the role
-                        try
+                        // Prevent accidental mistakes for the config command
+                        await arg.Channel.SendMessageAsync("Do you mean `!config hunt`?");
+                    }
+                    else
+                    {
+                        // Loop through all configured servers
+                        foreach (HunterInfo curInfo in _hunterInfo.GetAll())
                         {
-                            role = _client.GetGuild(curInfo.Guild).Roles.FirstOrDefault(cur => cur.Id == curInfo.Role);
-                        }
-                        catch { }
-
-                        // Check if bot was kicked from the server
-                        if (role == null)
-                        {
-                            _hunterInfo.Remove(curInfo.Guild);
-                            continue;
-                        }
-
-                        // Mark the hunter hole as pingable
-                        try
-                        {
-                            await role.ModifyAsync((a) =>
+                            // Check if bot was kicked from the server
+                            if (!_client.Guilds.Select(cur => cur.Id).Contains(curInfo.Guild))
                             {
-                                a.Mentionable = true;
-                            });
-                        }
-                        catch { }
-
-                        // Do the notification
-                        try
-                        {
-                            var channel = _client.GetChannel(curInfo.Channel) as ISocketMessageChannel;
-
-                            string pingString = $"<@&{role.Id}> hunt";
-
-                            if (isTest)
-                            {
-                                pingString = $"**{role.Name}** test";
+                                _hunterInfo.Remove(curInfo.Guild);
+                                continue;
                             }
 
-                            await channel.SendMessageAsync($"{pingString} {arg.Content.Substring("!hunt ".Length)}");
-                        }
-                        catch { }
+                            SocketRole role = null;
 
-                        // Mark the hunter hole as not pingable
-                        try
-                        {
-                            await role.ModifyAsync((a) =>
+                            if (curInfo.Role != 0)
                             {
-                                a.Mentionable = false;
-                            });
+                                // Get the role
+                                try
+                                {
+                                    role = _client.GetGuild(curInfo.Guild).Roles.FirstOrDefault(cur => cur.Id == curInfo.Role);
+                                }
+                                catch { }
+                            }
+
+                            if (role != null)
+                            {
+                                // Mark the hunter hole as pingable
+                                try
+                                {
+                                    await role.ModifyAsync((a) =>
+                                    {
+                                        a.Mentionable = true;
+                                    });
+                                }
+                                catch { }
+                            }
+
+                            // Do the notification
+                            try
+                            {
+                                var channel = _client.GetChannel(curInfo.Channel) as ISocketMessageChannel;
+
+                                string pingString;
+
+                                if (role != null)
+                                {
+                                    if (isTest)
+                                    {
+                                        pingString = $"**{role.Name}** `From {arg.Author.Username}({arg.Author.Id})` Test";
+                                    }
+                                    else
+                                    {
+                                        pingString = $"<@&{role.Id}> `From {arg.Author.Username}({arg.Author.Id})` Hunt";
+                                    }
+                                }
+                                else
+                                {
+                                    if (isTest)
+                                    {
+                                        pingString = $"`From {arg.Author.Username}({arg.Author.Id})` Test";
+                                    }
+                                    else
+                                    {
+                                        pingString = $"`From {arg.Author.Username}({arg.Author.Id})` Hunt";
+                                    }
+                                }
+
+                                await channel.SendMessageAsync($"{pingString} {arg.Content.Substring("!hunt ".Length)}");
+                            }
+                            catch { }
+
+                            if (role != null)
+                            {
+                                // Mark the hunter hole as not pingable
+                                try
+                                {
+                                    await role.ModifyAsync((a) =>
+                                    {
+                                        a.Mentionable = false;
+                                    });
+                                }
+                                catch { }
+                            }
                         }
-                        catch { }
                     }
                 }
                 else
@@ -260,6 +295,7 @@ namespace ProtectorVenari
                         Regex idMatch = new Regex("([0-9]+)");
 
                         ulong id = 0;
+                        bool noRole = false;
 
                         if (pingMatch.IsMatch(target))
                         {
@@ -268,6 +304,10 @@ namespace ProtectorVenari
                         else if (idMatch.IsMatch(target))
                         {
                             id = Convert.ToUInt64(target);
+                        }
+                        else if (target == "norole")
+                        {
+                            noRole = true;
                         }
 
                         // Get the role object for the specified ID
@@ -280,13 +320,13 @@ namespace ProtectorVenari
 
                         // If the target role is valid, then update the saved info for this server
                         // Use the channel that the config command was sent in for the notifications
-                        if (targetRole != null)
+                        if (targetRole != null || noRole)
                         {
                             info = new HunterInfo
                             {
                                 Guild = curGuild.Id,
                                 Channel = arg.Channel.Id,
-                                Role = targetRole.Id,
+                                Role = noRole ? 0 : targetRole.Id,
                             };
 
                             _hunterInfo.UpdateInfo(info);
@@ -303,7 +343,7 @@ namespace ProtectorVenari
                         var role = curGuild.Roles.FirstOrDefault(cur => cur.Id == info.Role);
                         var channel = curGuild.Channels.FirstOrDefault(cur => cur.Id == info.Channel);
 
-                        await arg.Channel.SendMessageAsync($"Hunt notifications will ping `{(role == null ? info.Role.ToString() : role.Name)}` in channel `#{(channel == null ? info.Channel.ToString() : channel.Name)}` on this server.");
+                        await arg.Channel.SendMessageAsync($"Hunt notifications will {(role == null ? "be in" : $"ping `{role.Name}` in")} channel `#{(channel == null ? info.Channel.ToString() : channel.Name)}` on this server.");
                     }
                 }
                 else

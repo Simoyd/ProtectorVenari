@@ -299,7 +299,7 @@ namespace ProtectorVenari
 
                         if (pingMatch.IsMatch(target))
                         {
-                            id = Convert.ToUInt64(target.Substring(2, target.Length - 3));
+                            id = Convert.ToUInt64(target.Substring(3, target.Length - 4));
                         }
                         else if (idMatch.IsMatch(target))
                         {

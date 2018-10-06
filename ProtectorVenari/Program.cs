@@ -147,24 +147,30 @@ namespace ProtectorVenari
         private async Task MessageReceived(SocketMessage arg)
         {
             // These commands work in a server or in DM
-            if (arg.Content == "!ping")
+            if (string.Compare(arg.Content, "!ping", true) == 0)
             {
                 // Basic ping to check if bot is alive
                 await arg.Channel.SendMessageAsync("pong!");
             }
-            else if (arg.Content.StartsWith("!hunt ") || arg.Content.StartsWith("!test "))
+            else if (string.Compare(arg.Content, "!hunt", true) == 0)
+            {
+                // Accidental command
+                await arg.Channel.SendMessageAsync("Do you mean `!hunter`?");
+            }
+            else if (arg.Content.StartsWith("!hunt ", StringComparison.OrdinalIgnoreCase) || arg.Content.StartsWith("!test ", StringComparison.OrdinalIgnoreCase))
             {
                 // Command to send hunt notification out. Test command for testing code without pinging.
-                bool isTest = arg.Content.StartsWith("!test ");
+                bool isTest = arg.Content.StartsWith("!test ", StringComparison.OrdinalIgnoreCase);
 
                 // Get the user's roles on main boundless discord
                 string[] authorRoles = _boundlessServer.GetUser(arg.Author.Id).Roles.Select(cur => cur.Name).ToArray();
 
                 // Only certain roles are allowed to perform the ping
                 if (authorRoles.Contains("Oortian") ||
-                    authorRoles.Contains("Oortling"))
+                    authorRoles.Contains("Oortling") ||
+                    authorRoles.Contains("Citizen"))
                 {
-                    if (arg.Content.StartsWith("!hunt config"))
+                    if (arg.Content.StartsWith("!hunt config", StringComparison.OrdinalIgnoreCase))
                     {
                         // Prevent accidental mistakes for the config command
                         await arg.Channel.SendMessageAsync("Do you mean `!config hunt`?");
@@ -258,7 +264,7 @@ namespace ProtectorVenari
                 else
                 {
                     // Permission denied
-                    await((SocketUserMessage)arg).AddReactionAsync(_nopeEmote);
+                    await ((SocketUserMessage)arg).AddReactionAsync(_nopeEmote);
                 }
             }
             else if (!(arg.Channel is SocketGuildChannel))
@@ -270,12 +276,12 @@ namespace ProtectorVenari
             // The following commands only work on a server
             SocketGuild curGuild = ((SocketGuildChannel)arg.Channel).Guild;
 
-            if (arg.Content.StartsWith("!listroles"))
+            if (arg.Content.StartsWith("!listroles", StringComparison.OrdinalIgnoreCase))
             {
                 // Lists the role IDs on the server (because there's no easy way to get this from the client without pinging the role)
                 await arg.Author.SendMessageAsync(string.Join("\r\n", ((SocketGuildChannel)arg.Channel).Guild.Roles.Select(cur => $"{cur.Name} - {cur.Id}").ToArray()));
             }
-            else if (arg.Content.StartsWith("!config hunt"))
+            else if (arg.Content.StartsWith("!config hunt", StringComparison.OrdinalIgnoreCase))
             {
                 // Command to update what role is pinged and what channel the notification goes to on a server
 
@@ -286,7 +292,7 @@ namespace ProtectorVenari
                     HunterInfo info = _hunterInfo.GetGuild(curGuild.Id);
 
                     // If there's at least a space after the command, then the user is trying to update the config
-                    if (arg.Content.StartsWith("!config hunt "))
+                    if (arg.Content.StartsWith("!config hunt ", StringComparison.OrdinalIgnoreCase))
                     {
                         string target = arg.Content.Substring("!config hunt ".Length);
 
@@ -352,7 +358,7 @@ namespace ProtectorVenari
                     await ((SocketUserMessage)arg).AddReactionAsync(_nopeEmote);
                 }
             }
-            else if (arg.Content == "!hunter")
+            else if (string.Compare(arg.Content, "!hunter", true) == 0)
             {
                 // Command for anyone to give or remove the hunter role from themself
 

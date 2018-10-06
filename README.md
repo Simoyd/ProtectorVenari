@@ -18,4 +18,4 @@ This command must be run on a server. This command can be run by anyone. If the 
 
 ### !hunt \<message\>
 ***Please don't abuse this command as it pings multiple servers!!!
-This command can be run on a server or in DM by users with the "Oortian" and/or "Oortling" roles. This command must have a message to work. When this command is sent, all servers with notifications configured will be notified with the message specified by this command. See "!config hunt" above for notification configuration, and how roles are pinged on servers.
+This command can be run on a server or in DM by users with the "Oortian", "Oortling", and/or "Citiizen" roles. This command must have a message to work. When this command is sent, all servers with notifications configured will be notified with the message specified by this command. See "!config hunt" above for notification configuration, and how roles are pinged on servers.

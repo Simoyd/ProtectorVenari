@@ -10,4 +10,10 @@
     <PackageReference Include="Discord.Net.Providers.WS4Net" Version="2.0.0-beta" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DiscordToken.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -40,6 +41,8 @@ namespace ProtectorVenari
         /// <param name="args">Command line arguments</param>
         static void Main(string[] args)
         {
+            _ = args;
+
             new Thread(() => new Program().MainAsync().GetAwaiter().GetResult()).Start();
         }
 
@@ -61,7 +64,7 @@ namespace ProtectorVenari
             _client.MessageReceived += MessageReceived;
 
             // Login to the discord server
-            string token = "TOKEN IS PRIVATE"; // Remember to keep this private!
+            string token = File.ReadAllLines("DiscordToken.txt").FirstOrDefault() ?? string.Empty;
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
 
@@ -81,7 +84,7 @@ namespace ProtectorVenari
         /// <summary>
         /// Persistance file used to store notification configs
         /// </summary>
-        private HunterInfoFile _hunterInfo = new HunterInfoFile();
+        private readonly HunterInfoFile _hunterInfo = new HunterInfoFile();
 
         /// <summary>
         /// The main boundless server

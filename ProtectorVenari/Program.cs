@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -51,11 +52,18 @@ namespace ProtectorVenari
         /// </summary>
         public async Task MainAsync()
         {
+            var excludedIntents = new HashSet<GatewayIntents>
+            {
+                GatewayIntents.GuildPresences,
+            };
+
             // Configure the discord connection
             _client = new DiscordSocketClient(new DiscordSocketConfig()
             {
                 LogLevel = LogSeverity.Verbose,
                 WebSocketProvider = Discord.Net.Providers.WS4Net.WS4NetProvider.Instance,
+                GatewayIntents = Enum.GetValues(typeof(GatewayIntents)).Cast<GatewayIntents>().Where(cur => !excludedIntents.Contains(cur)).Aggregate(GatewayIntents.None, (a, cur) => cur |= a),
+                AlwaysDownloadUsers = true,
             });
 
             // Subscribe to the events that we want
